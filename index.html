@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      * {
+        box-sizing: border-box !important;
+        font-family: "Courier New", Courier, monospace;
+      }
+
+      body {
+        margin: 0;
+        overflow: hidden;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      #screen {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+      }
+
+      #audio {
+        width: 100%;
+        margin-top: 20px;
+      }
+
+      #navbar {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        height: 60px;
+        background-color: #303030;
+      }
+
+      #content {
+        position: relative;
+        width: 100%;
+        height: calc(100vh - 60px);
+        display: flex;
+        background-color: #404040;
+      }
+
+      #left-content {
+        min-width: 300px;
+        max-width: 300px;
+        padding: 16px;
+        overflow: hidden auto;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      #right-content {
+        flex-grow: 1;
+        padding: 16px;
+        overflow: hidden auto;
+      }
+
+      #left-content,
+      #right-content {
+        height: 100%;
+      }
+
+      .button {
+        outline: none;
+        border: none;
+        width: 100%;
+        padding: 15px 20px;
+        border-radius: 5px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 18px;
+        cursor: pointer;
+      }
+
+      select {
+        padding: 5px;
+      }
+
+      p.label {
+        color: white;
+        margin: 0;
+      }
+
+      hr {
+        width: 100%;
+        border: none;
+        border-top: 1px solid white;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="navbar"></div>
+
+    <div id="content">
+      <div id="left-content">
+        <button
+          class="button"
+          style="color: white; background-color: red"
+          onclick="startStreaming()"
+        >
+          Start Streaming
+        </button>
+
+        <hr />
+
+        <p class="label">Mic Input Device</p>
+        <select id="input-devices" onchange="onInputDeviceChange()"></select>
+
+        <p class="label">Mic Output Device</p>
+        <select
+          id="mic-output-devices"
+          onchange="onMicOutputDeviceChange()"
+        ></select>
+
+        <p class="label">Screen Output Device</p>
+        <select
+          id="output-devices"
+          onchange="onScreenOutuptDeviceChange()"
+        ></select>
+      </div>
+      <div id="right-content">
+        <video src="" id="screen" autoplay controls></video>
+        <audio src="" id="audio" autoplay controls></audio>
+      </div>
+    </div>
+
+    <script>
+      let stream;
+      const inputSelect = document.querySelector("#input-devices");
+      const micOutputSelect = document.querySelector("#mic-output-devices");
+      const screenOutputSelect = document.querySelector("#output-devices");
+
+      const screen = document.querySelector("#screen");
+      const audio = document.querySelector("#audio");
+
+      let inputStream;
+
+      async function onInputDeviceChange() {
+        inputStream.getTracks().forEach((track) => track.stop());
+        await requestMic();
+      }
+
+      function onMicOutputDeviceChange() {
+        audio.setSinkId(micOutputSelect.value);
+      }
+
+      function onScreenOutuptDeviceChange() {
+        screen.setSinkId(screenOutputSelect.value);
+      }
+
+      async function requestMic() {
+        inputStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            deviceId: inputSelect.value
+              ? { exact: inputSelect.value }
+              : "undefined",
+          },
+        });
+
+        audio.srcObject = inputStream;
+      }
+
+      async function detectUserMedia() {
+        await requestMic();
+        let devices = await navigator.mediaDevices.enumerateDevices();
+
+        const audioInput = devices.filter(
+          (device) => device.kind === "audioinput"
+        );
+        const audioOutput = devices.filter(
+          (device) => device.kind === "audiooutput"
+        );
+
+        audioOutput.forEach((device) => {
+          const option = document.createElement("option");
+          option.value = device.deviceId;
+          option.text = device.label;
+
+          micOutputSelect.appendChild(option);
+        });
+
+        audioOutput.forEach((device) => {
+          const option = document.createElement("option");
+          option.value = device.deviceId;
+          option.text = device.label;
+
+          screenOutputSelect.appendChild(option);
+        });
+
+        audioInput.forEach((device) => {
+          const option = document.createElement("option");
+          option.value = device.deviceId;
+          option.text = device.label;
+          inputSelect.appendChild(option);
+        });
+      }
+
+      async function startStreaming() {
+        stream = await navigator.mediaDevices.getDisplayMedia({
+          video: true,
+          audio: true,
+        });
+
+        screen.srcObject = stream;
+      }
+
+      detectUserMedia();
+    </script>
+  </body>
+</html>
