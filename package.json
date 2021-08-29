@@ -1,0 +1,23 @@
+{
+  "name": "virtual_audio",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "http-server --port 8080"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cardeer/virtual_audio.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cardeer/virtual_audio/issues"
+  },
+  "homepage": "https://github.com/cardeer/virtual_audio#readme",
+  "devDependencies": {
+    "http-server": "^13.0.1"
+  }
+}

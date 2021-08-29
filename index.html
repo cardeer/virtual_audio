@@ -102,10 +102,17 @@
       <div id="left-content">
         <button
           class="button"
-          style="color: white; background-color: red"
+          style="color: white; background-color: green"
           onclick="startStreaming()"
         >
           Start Streaming
+        </button>
+        <button
+          class="button"
+          style="color: white; background-color: red"
+          onclick="startStreaming()"
+        >
+          Stop Streaming
         </button>
 
         <hr />
@@ -203,12 +210,20 @@
       }
 
       async function startStreaming() {
+        stopStreaming();
         stream = await navigator.mediaDevices.getDisplayMedia({
           video: true,
           audio: true,
         });
 
         screen.srcObject = stream;
+      }
+
+      async function stopStreaming() {
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
+          screen.srcObject = null;
+        }
       }
 
       detectUserMedia();
